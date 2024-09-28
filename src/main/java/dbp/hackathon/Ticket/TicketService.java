@@ -58,7 +58,6 @@ public class TicketService {
         context.setVariable("qr", ticket.getQr());
 
         final String htmlContent = templateEngine.process("EmailTemplate.html", context);
-        
 
         eventPublisher.publishEvent(new EmailEvent(estudiante.getEmail(), htmlContent, "Tu entrada ha sido adquirida con exito"));
 
