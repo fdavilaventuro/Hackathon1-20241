@@ -1,6 +1,7 @@
 package dbp.hackathon.Ticket;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -51,5 +52,15 @@ public class TicketController {
     @GetMapping
     public ResponseEntity<Iterable<Ticket>> getAllTickets() {
         return ResponseEntity.ok(ticketService.findAll());
+    }
+
+    @GetMapping("/{id}/{qr}")
+    public ResponseEntity<Ticket> validateTicket(@PathVariable("id") Long id, @PathVariable("qr") String qr) {
+        Boolean valid = ticketService.validateTicket(id, qr);
+        if (valid) {
+            return ResponseEntity.ok(ticketService.findById(id)); //Es valido
+        } else {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();//No es valido
+        }
     }
 }

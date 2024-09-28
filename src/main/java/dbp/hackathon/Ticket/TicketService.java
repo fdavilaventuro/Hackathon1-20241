@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
+import java.util.List;
 
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
@@ -57,7 +58,7 @@ public class TicketService {
         context.setVariable("qr", ticket.getQr());
 
         final String htmlContent = templateEngine.process("EmailTemplate.html", context);
-
+        
 
         eventPublisher.publishEvent(new EmailEvent(estudiante.getEmail(), htmlContent, "Tu entrada ha sido adquirida con exito"));
 
@@ -89,4 +90,9 @@ public class TicketService {
         ticketRepository.save(ticket);
     }
 
+    public Boolean validateTicket(Long id, String qr) {
+        Ticket ticket = ticketRepository.findById(id).orElseThrow(() -> new IllegalStateException("Ticket not found!"));
+
+        return ticket.getQr().equals(qr);
+    }
 }

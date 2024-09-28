@@ -8,11 +8,8 @@ public class QRHandler {
         StringBuilder salt = new StringBuilder();
         Random rnd = new Random();
         salt.append("https://api.qrserver.com/v1/create-qr-code/?data=");
-        while (salt.length() < 10) { // length of the random string.
-            int index = (int) (rnd.nextFloat() * SALTCHARS.length());
-            salt.append(SALTCHARS.charAt(index));
-        }
-        salt.append("&amp;size=100x100");
+        salt.append("HelloWorld!");
+        salt.append("&size=100x100");
         return salt.toString();
     }
 }
