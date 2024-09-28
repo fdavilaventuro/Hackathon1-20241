@@ -1,12 +1,18 @@
 package dbp.hackathon.Ticket;
 
+import dbp.hackathon.Email.event.EmailEvent;
 import dbp.hackathon.Estudiante.Estudiante;
 import dbp.hackathon.Estudiante.EstudianteRepository;
 import dbp.hackathon.Funcion.Funcion;
 import dbp.hackathon.Funcion.FuncionRepository;
+import dbp.hackathon.QR.QRHandler;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
+
+import org.thymeleaf.TemplateEngine;
+import org.thymeleaf.context.Context;
 
 @Service
 public class TicketService {
@@ -20,7 +26,14 @@ public class TicketService {
     @Autowired
     private FuncionRepository funcionRepository;
 
+    @Autowired
+    private ApplicationEventPublisher eventPublisher;
+
+    @Autowired
+    private TemplateEngine templateEngine;
+
     public Ticket createTicket(Long estudianteId, Long funcionId, Integer cantidad) {
+        QRHandler qrHandler = new QRHandler();
         Estudiante estudiante = estudianteRepository.findById(estudianteId).orElse(null);
         Funcion funcion = funcionRepository.findById(funcionId).orElse(null);
         if (estudiante == null || funcion == null) {
@@ -33,7 +46,20 @@ public class TicketService {
         ticket.setCantidad(cantidad);
         ticket.setEstado(Estado.VENDIDO);
         ticket.setFechaCompra(LocalDateTime.now());
-        ticket.setQr("GENERATED-QR-CODE");
+        ticket.setQr(qrHandler.getSaltString());
+
+        Context context = new Context();
+        context.setVariable("nombre", estudiante.getName());
+        context.setVariable("nombrePelicula", funcion.getNombre());
+        context.setVariable("fechaFuncion", funcion.getFecha());
+        context.setVariable("cantidad", cantidad);
+        context.setVariable("precioTotal", cantidad*funcion.getPrecio());
+        context.setVariable("qr", ticket.getQr());
+
+        final String htmlContent = templateEngine.process("EmailTemplate.html", context);
+
+
+        eventPublisher.publishEvent(new EmailEvent(estudiante.getEmail(), htmlContent, "Tu entrada ha sido adquirida con exito"));
 
         return ticketRepository.save(ticket);
     }
