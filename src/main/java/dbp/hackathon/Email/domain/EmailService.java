@@ -7,7 +7,7 @@ import org.springframework.mail.javamail.JavaMailSender;
 
 @Service
 public class EmailService {
-    @Autowired
+    @Autowired(required=false)
     private JavaMailSender javaMailSender;
 
     public void sendEmail(String to, String subject, String body) {
